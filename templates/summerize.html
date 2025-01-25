@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Notes and PYQ Platform</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
+</head>
+<body>
+    <header>
+        <h1>Dashboard</h1>
+        <nav>
+            <a href="/notes">Notes</a>
+            <a href="/pyq">Previous Year Questions</a>
+            <a href="/upload">Upload</a>
+            <a href="/files">Submissions</a>
+            <input type="text" id="dashboard-search" placeholder="Search Notes or PYQs...">
+        <ul id="search-results">
+            <!-- Search results will be dynamically inserted here -->
+        </ul>
+            <a href="/log_o">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="pdfFile">Upload PDF:</label>
+            <input type="file" id="pdfFile" name="file" accept=".pdf" required>
+            <button type="submit">Generate Summary</button>
+        </form>
+        <div id="result">
+            <h3>Summary:</h3>
+            <p id="summary"></p>
+        </div>        
+    </main>
+
+    <script>
+        $(document).ready(function() {
+            // Search functionality
+            $('#dashboard-search').on('input', function() {
+                const query = $(this).val();
+                $.ajax({
+                    url: "{% url 'search_dashboard' %}", // URL for the search endpoint
+                    data: { q: query },
+                    success: function(response) {
+                        const results = response.results;
+                        const resultsContainer = $('#search-results');
+                        resultsContainer.empty();
+                        if (results.length > 0) {
+                            results.forEach(function(result) {
+                                resultsContainer.append(`
+                                    <li>
+                                        <strong>Title:</strong> ${result.title}<br>
+                                        <strong>Category:</strong> ${result.category}<br>
+                                        <a href="${result.url}">View File</a>
+                                    </li>
+                                `);
+                            });
+                        } else {
+                            resultsContainer.append('<li>No results found</li>');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while searching.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

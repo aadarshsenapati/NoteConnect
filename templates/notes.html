@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+    <link rel="stylesheet" href="{% static 'css/notes.css' %}">
+    <link rel="icon" href="NoteConnectlogo.png" style="height:20px;width:20px;">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="icon" href="{% static 'img/NoteConnectlogo.png' %}" style="height:20px;width:20px;">
+</head>
+<body>
+    <header class="navbar">
+        <h1 class="navbar-title">Notes</h1>
+        <nav class="navbar-links">
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/pyq" class="nav-link">Previous Year Questions</a>
+            <a href="/log_o" class="nav-link">Logout</a>
+        </nav>
+    </header>
+    <main class="content">
+        <div class="card">
+            <h2 class="card-title">Available Notes</h2>
+            <div class="note">
+                <ul>
+                    {% for file in files %}
+                        <!-- <li> -->
+                            <br>
+                            <strong>Title:</strong> {{ file.title }}<br>
+                            <strong>Uploaded by:</strong> {{ file.uploaded_by.username }}<br>
+                            <strong>Likes:</strong> <span id="likes-{{ file.id }}">{{ file.likes }}</span><br>
+                            <strong>Dislikes:</strong> <span id="dislikes-{{ file.id }}">{{ file.dislikes }}</span><br>
+                            <a href="{% url 'view_pdf' file.file.name|urlencode %}" class="view-pdf">View PDF</a><br>
+                            <button data-file-id="{{ file.id }}" class="like-btn">Like</button>
+                            <button data-file-id="{{ file.id }}" class="dislike-btn">Dislike</button>     
+                            <br>                                                                       
+                        <!-- </li> -->
+                    {% empty %}
+                        <li>No notes uploaded yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        $(document).ready(function() {
+            // Search functionality
+            $('#notes-search').on('input', function() {
+                const query = $(this).val();
+                $.ajax({
+                    url: "{% url 'search_notes' %}",
+                    data: { q: query },
+                    success: function(response) {
+                        const results = response.results;
+                        const resultsContainer = $('#notes-results');
+                        resultsContainer.empty();
+                        if (results.length > 0) {
+                            results.forEach(function(result) {
+                                resultsContainer.append(`<li><a href="view_pdf/${result.url}">${result.title}</a></li>`);
+                            });
+                        } else {
+                            resultsContainer.append('<li>No results found</li>');
+                        }
+                    }
+                });
+            });
+
+            // Like button functionality
+            $('.like-btn').on('click', function() {
+                const fileId = $(this).data('file-id');
+                $.ajax({
+                    url: `/files/${fileId}/like/`,
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    success: function(data) {
+                        $(`#likes-${fileId}`).text(data.likes);
+                        $(`#points-${fileId}`).text(data.points);
+                    },
+                    error: function() {
+                        alert('An error occurred while liking the file.');
+                    }
+                });
+            });
+
+            // Dislike button functionality
+            $('.dislike-btn').on('click', function() {
+                const fileId = $(this).data('file-id');
+                $.ajax({
+                    url: `/files/${fileId}/dislike/`,
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    success: function(data) {
+                        $(`#dislikes-${fileId}`).text(data.dislikes);
+                        $(`#points-${fileId}`).text(data.points);
+                    },
+                    error: function() {
+                        alert('An error occurred while disliking the file.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

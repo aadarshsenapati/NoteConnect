@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteConnect-Sign Up</title>
+    <link rel="icon" href="NoteConnectlogo.png">
+    <!-- <link rel="stylesheet" href="{% static 'css/styles.css' %}"> -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="{% static 'css/signup.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="login-gradient">
+        <header>
+            <h1 class="signup-title">Sign Up</h1>
+        </header>
+        <main>
+            <div class="login-container">
+                <form action="/sign" method="POST">
+                    {% csrf_token %}
+    
+                    {% if errors %}
+                        <ul style="color: red;">
+                            {% for field, error in errors.items %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <label for="first-name" class="form-label">First Name:</label>
+                    <input type="text" id="first-name" name="first_name" class="form-input" required>
+                    <br>
+                    <label for="last-name" class="form-label">Last Name:</label>
+                    <input type="text" id="last-name" name="last_name" class="form-input" required>
+                    <br>
+                    <label for="username" class="form-label">Username:</label>
+                    <input type="text" id="username" name="username" class="form-input" required>
+                    <br>
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" id="email" name="email" class="form-input" required>
+                    <br>
+                    <label for="password1" class="form-label">Password:</label>
+                    <input type="password" id="password1" name="password1" class="form-input" required>
+                    <br>
+                    <label for="password2" class="form-label">Confirm Password:</label>
+                    <input type="password" id="password2" name="password2" class="form-input" required>
+                    <br>
+                    <button type="submit" class="signup-button">Sign Up</button>
+                </form>
+                <p class="helper-text">
+                    Already have an account? <a href="/log" class="helper-link">Login</a>
+                </p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
